@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 32;
+use Test::More tests => 34;
 
 use_ok('Language::MzScheme');
 
@@ -47,6 +47,11 @@ my $port = $env->apply('open-input-file', "$0");
 is($port->read_char, '#', 'read_char, port');
 is($port->read, '!/usr/bin/perl', 'read, port');
 is(<$port>, 'use', '<>, port');
+
+my $sym = $env->sym('symbol');
+ok($env->S->SYMBOLP($sym), 'new symbol with ->sym');
+my $str = $env->val('value');
+ok($env->S->STRINGP($str), 'new value with ->val');
 
 my $code = $env->lookup('square');
 isa_ok($code, 'CODE', 'to_coderef');

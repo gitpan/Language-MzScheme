@@ -170,6 +170,33 @@ sub apply {
     return $obj;
 }
 
+=head2 val($scalar)
+
+Return a MzScheme object that represents the content of C<$scalar>,
+which may be a simple scalar or a reference.
+
+=cut
+
+sub val {
+    my $self = shift;
+    my $obj = S->from_perl_scalar($_[0]);
+    $Objects{S->REFADDR($obj)} ||= $self if ref($obj);
+    return $obj;
+}
+
+=head2 sym($string)
+
+Returns a MzScheme symbol object named C<$string>.
+
+=cut
+
+sub sym {
+    my $self = shift;
+    my $obj = S->intern_symbol("$_[0]");
+    $Objects{S->REFADDR($obj)} ||= $self if ref($obj);
+    return $obj;
+}
+
 =head1 CONTEXTS
 
 There are 10 different sigils, each representing a way to interpret

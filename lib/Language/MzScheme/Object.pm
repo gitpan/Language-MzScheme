@@ -84,7 +84,7 @@ foreach my $proc (qw( read-char write-char )) {
 }
 
 foreach my $proc (qw(
-    eval apply lambda lookup
+    eval apply lambda lookup val sym
     perl_do perl_eval perl_require perl_use perl_no
 )) {
     no strict 'refs';
@@ -159,11 +159,13 @@ sub to_hashref {
 sub to_arrayref {
     my $self = shift;
 
+    # XXX - rewrite in XS
     if (S->VECTORP($self)) {
-        my $vec = S->VEC_BASE($self);
-        my $env = $self->env;
-        $Language::MzScheme::Env::Objects{+$_}||=$env for @$vec;
-        return $vec;
+        $self = S->vector_to_list($self);
+        #my $vec = S->VEC_BASE($self);
+        #my $env = $self->env;
+        #$Language::MzScheme::Env::Objects{+$_}||=$env for @$vec;
+        #return $vec;
     }
 
     return [

@@ -36,7 +36,7 @@ make_h();
 system(
     'swig',
     "-I$include",
-    ((v($swig_version) ge v('1.3.20')) ? qw(-noproxy -noruntime) : ()),
+    ((v($swig_version) ge v('1.3.20')) ? qw(-noproxy) : ()),
     qw(-module Language::MzScheme -includeall -exportall -perl5 mzscheme.i)
 );
 

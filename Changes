@@ -1,3 +1,10 @@
+[Changes for 0.08 - June 15, 2004]
+
+Object and Environment now has ->val and ->sym to easily create
+MzScheme objects from Perl.
+
+Fixed building and eliminated segmentation faults on Mac OS X.
+
 [Changes for 0.07 - June 15, 2004]
 
 MzPerl now correctly supports end-of-file as end of ";__PERL__;" regions.

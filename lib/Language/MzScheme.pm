@@ -1,5 +1,5 @@
 package Language::MzScheme;
-$Language::MzScheme::VERSION = '0.07';
+$Language::MzScheme::VERSION = '0.08';
 
 use strict;
 use vars qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -19,7 +19,7 @@ Language::MzScheme - Perl bindings to PLT MzScheme
 
 =head1 VERSION
 
-This document describes version 0.07 of Language::MzScheme, released
+This document describes version 0.08 of Language::MzScheme, released
 June 15, 2004.
 
 =head1 SYNOPSIS
