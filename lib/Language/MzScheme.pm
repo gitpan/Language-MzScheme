@@ -1,5 +1,5 @@
 package Language::MzScheme;
-$Language::MzScheme::VERSION = '0.01';
+$Language::MzScheme::VERSION = '0.02';
 
 use strict;
 use Language::MzScheme_in;
@@ -10,7 +10,7 @@ Language::MzScheme - Perl bindings to PLT MzScheme
 
 =head1 VERSION
 
-This document describes version 0.00_01 of Language::MzScheme, released
+This document describes version 0.02 of Language::MzScheme, released
 June 7, 2004.
 
 =head1 SYNOPSIS
@@ -36,11 +36,14 @@ next few versions.
 
 =cut
 
+mzscheme_init() unless $Language::MzScheme::Initialized;
+$Language::MzScheme::Initialized++;
+
 1;
 
 =head1 SEE ALSO
 
-L<http://plt-scheme.org/software/mzscheme/>
+L<Inline::MzScheme>, L<http://plt-scheme.org/software/mzscheme/>
 
 =head1 AUTHORS
 
@@ -48,7 +51,7 @@ Autrijus Tang E<lt>autrijus@autrijus.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2004 by Best Practical Solutions, LLC.
+Copyright 2004 by Autrijus Tang E<lt>autrijus@autrijus.orgE<gt>.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

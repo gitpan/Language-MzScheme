@@ -1,3 +1,12 @@
-[Changes for 0.00_01 - June 7, 2004]
+[Changes for 0.02 - June 7, 2004]
+
+Worked around automatic "swig -shadow" on Mac OS X, by not rebuilding
+lib/Language/MzScheme_in.pm by default.
+
+All publicly supported functions from "schemex.h" are now wrapped.
+
+Fixed ithreads building problem by setting scheme_set_stack_base().
+
+[Changes for 0.01 - June 7, 2004]
 
 Initial CPAN Release.

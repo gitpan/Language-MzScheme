@@ -35,7 +35,14 @@ system(
     qw(-module Language::MzScheme -includeall -exportall -perl5 mzscheme.i)
 );
 
-rename("MzScheme.pm" => "lib/Language/MzScheme_in.pm");
+if (-e "lib/Language/MzScheme_in.pm" and !$ENV{SWIG_REBUILD}) {
+    print "Using existing lib/Language/MzScheme_in.pm.\n";
+    print "(To regenerate it, setenv SWIG_REBUILD=1 and rerun Makefile.PL.)\n";
+    unlink 'MzScheme.pm';
+}
+else {
+    rename('MzScheme.pm' => 'lib/Language/MzScheme_in.pm');
+}
 
 makemaker_args(
     LIBS => "-L$plt_path/lib -lmzgc -lmzscheme",
@@ -46,23 +53,26 @@ makemaker_args(
 WriteAll( sign => 1 );
 
 sub make_hi {
-    local $/ = ";\n";
-
     open IN, "$include/scheme.h" or die $!;
-    open OUT, "> scheme.hi" or die $!;
+    open OUT, "> mzscheme_wrap.h" or die $!;
     while (<IN>) {
-        s/.*?^enum\b/enum/ms or next;
-        print OUT $_, "\n";
+        next if /^#include\b/;
+        next if /typedef struct Scheme_Jumpup_Buf \{/ .. /\} Scheme_Jumpup_Buf/;
+        next if /typedef struct Scheme_Thread \{/ .. /\} Scheme_Thread/;
+        next if /^MZ_EXTERN/;
+        print OUT $_;
     }
     close OUT;
     close IN;
 
-    open IN, "$include/schemef.h" or die $!;
-    open OUT, "> schemef.hi" or die $!;
+    open IN, "$include/schemex.h" or die $!;
+    open OUT, ">> mzscheme_wrap.h" or die $!;
     while (<IN>) {
-        /(.*)^MZ_EXTERN\s*(.+)/sm or next;
-        $_ = "$1$2"; s/MZ_EXTERN\s*//g;
-        print OUT $_, "\n";
+        next if /^#include\b/;
+        next if /^typedef struct \{/;
+        next if /^\} Scheme_Extension_Table;/;
+        s/\(\*(\w+)\)/$1/;
+        print OUT $_;
     }
     close OUT;
     close IN;
