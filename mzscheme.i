@@ -1,17 +1,49 @@
 #pragma SWIG nowarn=302,451,509
 
 %{
-
-#include "scheme.h"
-
-void mzscheme_init () {
-    int dummy;
-    scheme_set_stack_base(&dummy, 1);
-}
-
+#include "mzscheme.c"
 %}
 
-void mzscheme_init ();
+%typemap(in) Perl_Scalar {
+    $1 = (void *)$input;
+}
+
+%typemap(out) Perl_Scalar {
+    $result = (SV *)$1;
+}
+
+%typemap(in) Scheme_Object ** {
+    AV *tempav;
+    I32 len;
+    int i;
+    SV  **tv;
+    if (!SvROK($input))
+        croak("argument $argnum is not a reference.");
+    if (SvTYPE(SvRV($input)) != SVt_PVAV)
+        croak("argument $argnum is not an array.");
+    tempav = (AV*)SvRV($input);
+    len = av_len(tempav);
+    $1 = (Scheme_Object **) malloc((len+2)*sizeof(Scheme_Object *));
+    for (i = 0; i <= len; i++) {
+        tv = av_fetch(tempav, i, 0);
+        $1[i] = (Scheme_Object *) SvIV((SV*)SvRV(*tv));
+    }
+    $1[i] = NULL;
+};
+
+%typemap(freearg) Scheme_Object ** {
+    free($1);
+}
+
+%typemap(out) Scheme_Object ** {
+    $result = newRV((SV *)_mzscheme_objects_AV($1));
+    sv_2mortal($result);
+    argvi++;
+}
+
+void            mzscheme_init();
+Scheme_Object*  mzscheme_make_perl_prim_w_arity(Perl_Scalar cv_ref, const char *name, int mina, int maxa);
+Scheme_Object * mzscheme_from_perl_scalar (Perl_Scalar sv);
 
 Scheme_Type     SCHEME_TYPE(Scheme_Object *obj);
 int             SCHEME_PROCP(Scheme_Object *obj);

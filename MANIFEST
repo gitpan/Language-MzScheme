@@ -8,14 +8,14 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/Language/MzScheme.pm
-lib/Language/MzScheme_in.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
+mzscheme.c
+mzscheme.h
 mzscheme.i
 README
 SIGNATURE
 t/0-signature.t
 t/1-basic.t
-t/scripts/three.pl

@@ -11,10 +11,21 @@ author('Autrijus Tang <autrijus@autrijus.org>');
 license('perl');
 can_cc() or die "This module requires a C compiler";
 
+print << ".";
+Checking dependencies:
+- SWIG v1.3.20 or above - http://www.swig.org/
+- MzScheme v200 or above - http://plt-scheme.org/software/mzscheme/
+.
+
 `swig -ldflags` =~ /\w/
-  or die "This module requires SWIG - http://www.swig.org/";
+  or die "SWIG not found, aborting";
 `mzscheme --version` =~ /\d/
-  or die "This module requires MzScheme - http://plt-scheme.org/software/mzscheme/";
+  or die "MzScheme not found, aborting";
+
+print << ".";
+...done.  
+(If build fails, please check swig and mzscheme's versions manually.)
+.
 
 my $plt_path = $ENV{PLT_PATH} || do {
     my $show = `mzc --ldl-show --help`
@@ -32,17 +43,11 @@ make_hi();
 system(
     'swig',
     "-I$include",
-    qw(-module Language::MzScheme -includeall -exportall -perl5 mzscheme.i)
+    qw(-module Language::MzScheme -noproxy -includeall -exportall -perl5 mzscheme.i)
 );
 
-if (-e "lib/Language/MzScheme_in.pm" and !$ENV{SWIG_REBUILD}) {
-    print "Using existing lib/Language/MzScheme_in.pm.\n";
-    print "(To regenerate it, setenv SWIG_REBUILD=1 and rerun Makefile.PL.)\n";
-    unlink 'MzScheme.pm';
-}
-else {
-    rename('MzScheme.pm' => 'lib/Language/MzScheme_in.pm');
-}
+unlink('lib/Language/MzScheme_in.pm');
+rename('MzScheme.pm' => 'lib/Language/MzScheme_in.pm');
 
 makemaker_args(
     LIBS => "-L$plt_path/lib -lmzgc -lmzscheme",

@@ -1,8 +1,13 @@
 package Language::MzScheme;
-$Language::MzScheme::VERSION = '0.02';
+$Language::MzScheme::VERSION = '0.03';
 
 use strict;
+use vars qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
 use Language::MzScheme_in;
+
+@EXPORT_OK = @EXPORT;
+@EXPORT = ();
+%EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 =head1 NAME
 
@@ -10,13 +15,13 @@ Language::MzScheme - Perl bindings to PLT MzScheme
 
 =head1 VERSION
 
-This document describes version 0.02 of Language::MzScheme, released
-June 7, 2004.
+This document describes version 0.03 of Language::MzScheme, released
+June 9, 2004.
 
 =head1 SYNOPSIS
 
     use strict;
-    use Language::MzScheme;
+    use Language::MzScheme ':all';
     my $env = scheme_basic_env();
     my $out = scheme_get_param($scheme_config, $MZCONFIG_OUTPUT_PORT);
     my $val = scheme_eval_string('(+ 1 2)', $env);
@@ -36,8 +41,10 @@ next few versions.
 
 =cut
 
-mzscheme_init() unless $Language::MzScheme::Initialized;
-$Language::MzScheme::Initialized++;
+if (!$Language::MzScheme::Initialized) {
+    mzscheme_init() if defined &mzscheme_init;
+    $Language::MzScheme::Initialized++;
+}
 
 1;
 
