@@ -26,7 +26,7 @@ mzscheme_make_perl_object_w_arity (Perl_Scalar object, const char *name, int min
     Perl_Callback *callback = (Perl_Callback *)malloc(sizeof(Perl_Callback));
     callback->magic = Perl_Callback_MAGIC;
     callback->sv = object;
-    callback->sigil = ((sigil_string == NULL) ? NULL : *sigil_string);
+    callback->sigil = ((sigil_string == NULL) ? Perl_Context_AUTO : *sigil_string);
     SvREFCNT_inc(object);
 
     return scheme_make_closed_prim_w_arity(
@@ -174,24 +174,38 @@ _mzscheme_leave (int count, char sigil) {
 
     SPAGAIN ;
 
-    if (sigil == NULL) {
+    if (sigil == Perl_Context_AUTO) {
         /* Auto-context */
         sigil = ((count == 1) ? Perl_Context_SCALAR : Perl_Context_LIST);
     }
 
     switch (sigil) {
+        case Perl_Context_VOID :
+            rv = scheme_void;
+            break;
         case Perl_Context_BOOLEAN :
             rv = (((count > 0) && SvTRUE(TOPs)) ? scheme_true : scheme_false);
-            break;
-        case Perl_Context_SYMBOL :
-            rv = ((count > 0) ? mzscheme_from_perl_symbol(TOPs) : scheme_null);
             break;
         case Perl_Context_SCALAR :
             rv = ((count > 0) ? mzscheme_from_perl_scalar(TOPs) : scheme_null);
             break;
-        case Perl_Context_VOID :
-            rv = scheme_void;
+        case Perl_Context_STRING :
+            rv = scheme_make_string( (count > 0) ? (char *)SvPV(TOPs, PL_na) : "" );
             break;
+        case Perl_Context_NUMBER :
+            rv = ((count > 0) ? SvIOK(TOPs) ? scheme_make_integer_value( (int)SvIV(TOPs) )
+                              : SvNOK(TOPs) ? scheme_make_double( (double)SvNV(TOPs) )
+                                            : (strchr(SvPV(TOPs, PL_na), '.') == NULL)
+                                                ? scheme_make_integer_value( (int)SvIV(TOPs) )
+                                                : scheme_make_double( (double)SvNV(TOPs) )
+                              : scheme_make_integer_value(0));
+            break;
+        case Perl_Context_CHAR : {
+            char *tmpstr;
+            rv = scheme_make_character(
+                ((count > 0) && (tmpstr = SvPV(TOPs, PL_na))) ? *tmpstr : '\0'
+            );
+        }   break;
         case Perl_Context_HASH : {
             Scheme_Hash_Table *hash = scheme_make_hash_table(SCHEME_hash_ptr);
             if ((count % 2) == 1) {
@@ -212,7 +226,34 @@ _mzscheme_leave (int count, char sigil) {
             }
             rv = (Scheme_Object *)hash;
         }   break;
-        default: /* ARRAY */
+        case Perl_Context_ALIST : {
+            return_values = (Scheme_Object **) malloc(((int)(count/2)+3)*sizeof(Scheme_Object *));
+            if ((count % 2) == 1) { 
+                count--;
+                return_values[count / 2] = scheme_make_pair(
+                    mzscheme_from_perl_scalar(POPs),
+                    scheme_null
+                );
+            }
+            count = count / 2;
+            for (i = count - 1; i >= 0 ; i--) {
+                rv = mzscheme_from_perl_scalar(POPs);
+                return_values[i] = scheme_make_pair(
+                    mzscheme_from_perl_scalar(POPs),
+                    rv
+                );
+            }
+            rv = scheme_build_list(count, return_values);
+        }   break;
+        case Perl_Context_VECTOR :
+            rv = scheme_make_vector(count+1, NULL);
+            SCHEME_VEC_SIZE(rv) = count;
+            for (i = count - 1; i >= 0 ; i--) {
+                SCHEME_VEC_ELS(rv)[i] = mzscheme_from_perl_scalar(POPs);
+            }
+            SCHEME_VEC_ELS(rv)[count] = NULL;
+            break;
+        default: /* LIST */
             if (count == 0) {
                 rv = scheme_null;
             }
@@ -221,8 +262,8 @@ _mzscheme_leave (int count, char sigil) {
                 for (i = count - 1; i >= 0 ; i--) {
                     return_values[i] = mzscheme_from_perl_scalar(POPs);
                 }
+                rv = scheme_build_list((int)count, return_values);
             }
-            rv = scheme_build_list((int)count, return_values);
     }
 
     PUTBACK ;

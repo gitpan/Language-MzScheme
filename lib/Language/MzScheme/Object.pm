@@ -18,6 +18,52 @@ use overload (
     fallback    => 1,
 );
 
+=head1 NAME
+
+Language::MzScheme::Object - MzScheme value object
+
+=head1 SYNOPSIS
+
+    use Language::MzScheme;
+    my $env = Language::MzScheme->new;
+    my $obj = $env->lookup('cons');
+    # ...
+
+=head1 OVERLOADS
+
+Following operators are overloaded for this class:
+
+    bool "" 0+ ! &{} %{} @{} *{} ${} <>
+
+=head1 METHODS
+
+Under construction.
+
+=head2 Converting into Perl values
+
+    to_bool to_string to_number to_negate
+    to_coderef to_hashref to_arrayref to_globref to_scalarref
+    as_write as_display as_perl_data
+
+=head2 List object methods
+
+    car cdr cadr caar cddr caadr
+
+=head2 Port object methods
+
+    read write read-char write-char
+
+=head2 Environment dispatchers
+
+    eval apply lambda lookup
+    perl_do perl_eval perl_require perl_use perl_no
+
+=head2 Miscellanous Utilities
+
+    env bless isa
+
+=cut
+
 foreach my $proc (qw( car cdr cadr caar cddr )) {
     no strict 'refs';
     my $code = S."::SCHEME_\U$proc";
@@ -103,7 +149,7 @@ sub to_hashref {
 
     my %rv;
     while (my $obj = $alist->car) {
-        $rv{$obj->car} = $obj->cdr;
+        $rv{as_perl_data($obj->car)} = $obj->cdr;
         $alist = $alist->cdr;
     }
     return \%rv;
@@ -147,6 +193,8 @@ sub as_write {
 sub as_perl_data {
     my $self = shift;
 
+    return $self unless UNIVERSAL::isa($self, __PACKAGE__);
+
     if ( S->PERLP($self) ) {
         return S->to_perl_scalar($self);
     }
@@ -155,17 +203,17 @@ sub as_perl_data {
     }
     elsif ( S->HASHTP($self) ) {
         my $hash = $self->to_hashref;
-        $hash->{$_} = $hash->{$_}->as_perl_data for keys %$hash;
+        $hash->{$_} = as_perl_data($hash->{$_}) for keys %$hash;
         return $hash;
     }
     elsif ( S->ARRAY_REFP($self) ) {
-        return [ map $_->as_perl_data, @{$self->to_arrayref} ];
+        return [ map as_perl_data($_), @{$self->to_arrayref} ];
     }
     elsif ( S->GLOB_REFP($self) ) {
         return $self; # XXX -- doesn't really know what to do
     }
     elsif ( S->SCALAR_REFP($self) ) {
-        return \${$self->to_scalarref}->as_perl_data;
+        return \as_perl_data(${$self->to_scalarref});
     }
     elsif ( S->UNDEFP($self) ) {
         return undef;
@@ -182,3 +230,24 @@ sub isa {
 }
 
 1;
+
+__END__
+
+=head1 SEE ALSO
+
+L<Language::MzScheme>, L<Language::MzScheme::Env>
+
+=head1 AUTHORS
+
+Autrijus Tang E<lt>autrijus@autrijus.orgE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2004 by Autrijus Tang E<lt>autrijus@autrijus.orgE<gt>.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+See L<http://www.perl.com/perl/misc/Artistic.html>
+
+=cut

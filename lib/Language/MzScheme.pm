@@ -1,5 +1,5 @@
 package Language::MzScheme;
-$Language::MzScheme::VERSION = '0.05';
+$Language::MzScheme::VERSION = '0.06';
 
 use strict;
 use vars qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -19,8 +19,8 @@ Language::MzScheme - Perl bindings to PLT MzScheme
 
 =head1 VERSION
 
-This document describes version 0.05 of Language::MzScheme, released
-June 13, 2004.
+This document describes version 0.06 of Language::MzScheme, released
+June 14, 2004.
 
 =head1 SYNOPSIS
 
@@ -34,6 +34,9 @@ June 13, 2004.
 
 This module provides Perl bindings to PLT's MzScheme language.
 
+For a proof-of-concept interpreter that can mix Perl and MzScheme code,
+see the L<mzperl> utility bundled with this distribution.
+
 The documentation is sorely lacking at this moment.  For an overview of
 supported features, please consult F<t/*.t> in the source distribution.
 
@@ -41,9 +44,7 @@ supported features, please consult F<t/*.t> in the source distribution.
 
 sub new {
     my $self = shift;
-    my $env = $self->basic_env;
-    $env->define_perl_wrappers;
-    return $env;
+    return Language::MzScheme::Env->new(@_);
 }
 
 if (!$Language::MzScheme::Initialized) {
@@ -74,9 +75,15 @@ if (!$Language::MzScheme::Initialized) {
 
 1;
 
+__END__
+
 =head1 SEE ALSO
 
-L<Inline::MzScheme>, L<http://plt-scheme.org/software/mzscheme/>
+L<mzperl>, L<Inline::MzScheme>
+
+L<Language::MzScheme::Env>, L<Language::MzScheme::Object>
+
+L<http://plt-scheme.org/software/mzscheme/>
 
 =head1 AUTHORS
 

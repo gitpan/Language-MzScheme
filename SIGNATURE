@@ -14,11 +14,11 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 10c1987dd95758998051c7a258fbe3eb145a796b Changes
+SHA1 a4de2d54f29b397fe30a533b71edf1def4f1d494 Changes
 SHA1 63708e7b2260e75bc91172aa577754c8e5415271 MANIFEST
 SHA1 7a81e2090d10fa9903f45f7255b4f30156eb0d5e MANIFEST.SKIP
-SHA1 feec895c540d00c8ab57ad3b6976f29934bdf1f1 META.yml
-SHA1 5d8af3e94dcd8e32fcdde9cbb955fdcfeb097d18 Makefile.PL
+SHA1 215e059ea7ecdb586a833dc41bba84b300578dfb META.yml
+SHA1 a41f7d933c9adb64682f139e17bf4d58fa45185e Makefile.PL
 SHA1 f502bcb5576b2678f411613940c5b901ba5f0270 README
 SHA1 2b65fc08c268c16ae7097d800bacccc7b8c9c905 inc/Module/Install.pm
 SHA1 fd56d5c793014bccac2cd1e61926c4da8538ef99 inc/Module/Install/Base.pm
@@ -29,24 +29,24 @@ SHA1 207dfa13341a374fc78325fbeb99bc36659aef2d inc/Module/Install/Metadata.pm
 SHA1 bfc36deb38cf94243679dfa71f6e8c4e2000d20a inc/Module/Install/Scripts.pm
 SHA1 aff9341a15c04faec47089851e43d9d4061337e7 inc/Module/Install/Win32.pm
 SHA1 8e0d347ca21bc18b380d9d1aa5910b8d078a76b7 inc/Module/Install/WriteAll.pm
-SHA1 3c33c9334f1cae80d9eb58062f2e824a63d2bf24 lib/Language/MzScheme.pm
-SHA1 9cc7e0bea6ba30f69379d92fb7335e33dac908b3 lib/Language/MzScheme/Env.pm
-SHA1 4a8824e8b8b69bf4a26c6feabe3f6dfadce2da98 lib/Language/MzScheme/Object.pm
-SHA1 d51018efe6c9c97d3d5347b71c7fd5e69665ccf3 mzscheme.c
-SHA1 18181e6718b3ecabf7979a23a0804cfbb5e3edf5 mzscheme.h
+SHA1 ed4e4d5bfe074732c8381471f29c31d3798739aa lib/Language/MzScheme.pm
+SHA1 fc8ee4a89d505614b94488b3ccdc4f0743d9612c lib/Language/MzScheme/Env.pm
+SHA1 7ef0fc9e5a441b3b2b6d0aa920192282c223e479 lib/Language/MzScheme/Object.pm
+SHA1 7602d4a0c5f3c4eeefa676b6dcfb1b922f9a3751 mzscheme.c
+SHA1 17aa75bc0034488c686c3d370f9652b31925725b mzscheme.h
 SHA1 30bbb57c7092670e6ff2e607c4fef85ef32f0631 mzscheme.i
-SHA1 50467a906e616f88b863f2427c32a528d74324be script/mzperl
+SHA1 560aa6cebebd5a651eaf2bee5121fefc1c3a63e6 script/mzperl
 SHA1 63c7ea0cfdd7643aa113c260eec9c9bf0a6ee8a0 t/0-signature.t
 SHA1 2d94109bd6ba3092b58c62d18c721cda2af0c7af t/1-basic.t
-SHA1 4f9efb6feac316fdb8328d89d1afeceb04dfa78c t/2-context.t
+SHA1 e44b34fb9594096289a38bae74d4ed6330546f6a t/2-context.t
 SHA1 86e4a8ba68f2b1ffc21a9f3a9a3f1f51beb69835 t/3-object.t
 SHA1 d5f24b9183df579f97f3a86d3a25bdcdad49180f t/4-data.t
-SHA1 2ea6ccc8e9928d3f8c40ae7f27f819e4e16f2a1f t/5-perl.t
-SHA1 6d33c54742393bc16a9d3196637f6240b2ec5160 t/6-error.t
+SHA1 42b23053d7905258079a5cbd43157de6c1dffb45 t/5-perl.t
+SHA1 d18267a6e23e81b724003850349c222e3b1ec729 t/6-error.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.3 (FreeBSD)
 
-iD8DBQFAy9b7tLPdNzw1AaARAr0zAJwLh6xUuy1CX4YtKI+op50mKhWsfACeJpTq
-1yDvmY4PyDJ6Pm2eADUI5rw=
-=K10e
+iD8DBQFAzKLStLPdNzw1AaARAsA7AJ42pbpTOYsMlhxCij+VUkz4rqtrGgCeLoTA
+NNnZ7SqAGzPhKf2OkUvGNL4=
+=YIzY
 -----END PGP SIGNATURE-----

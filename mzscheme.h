@@ -14,17 +14,30 @@ Scheme_Object*      _mzscheme_closed_prim_OBJ (void *callback, int argc, Scheme_
 Scheme_Object**     _mzscheme_from_perl_arrayref_to_objects (Perl_Scalar sv);
 
 #define Perl_Callback_MAGIC  '&'
+
+#define Perl_Context_AUTO    NULL
+#define Perl_Context_VOID    '!'
+
 #define Perl_Context_BOOLEAN '?'
 #define Perl_Context_SCALAR  '$'
-#define Perl_Context_SYMBOL  '\''
+#define Perl_Context_STRING  '~'
+#define Perl_Context_NUMBER  '+'
+#define Perl_Context_CHAR    '.'
+
 #define Perl_Context_LIST    '@'
+#define Perl_Context_VECTOR  '^'
 #define Perl_Context_HASH    '%'
-#define Perl_Context_VOID    '!'
+#define Perl_Context_ALIST   '&'
+
+#define Perl_To_SYMBOL
+
 #define Perl_Context(sigil) \
     ( (sigil == Perl_Context_VOID) ? G_VOID : \
       ((sigil == Perl_Context_BOOLEAN) || \
        (sigil == Perl_Context_SCALAR) || \
-       (sigil == Perl_Context_SYMBOL)) ? G_SCALAR : \
+       (sigil == Perl_Context_STRING) || \
+       (sigil == Perl_Context_NUMBER) || \
+       (sigil == Perl_Context_CHAR)) ? G_SCALAR : \
        G_ARRAY )
 
 #define MZSCHEME_REFADDR(sv) (SvROK(sv) ? (int)PTR2UV(SvRV(sv)) : 0)

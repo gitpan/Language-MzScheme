@@ -27,5 +27,5 @@ sub last {
 
 sub show_ok {
     my $err = shift; chomp $err;
-    ok($err, "error captured with \$SIG{__DIE__}: $err");
+    ok($err, "error captured with \$SIG{__DIE__}: [$err]");
 }

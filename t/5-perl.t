@@ -1,6 +1,6 @@
 use strict;
 use Math::Trig ();
-use Test::More tests => 13;
+use Test::More tests => 12;
 
 use_ok('Language::MzScheme');
 
@@ -18,11 +18,5 @@ ok(!$env->eval("(Math::Trig 'isa? 'Exploder)"), 'isa? - false');
 ok($env->eval("(Math::Trig 'can? 'pi)"), 'can? - true');
 ok(!$env->eval("(Math::Trig 'can? 'pie)"), 'can? - false');
 
-is($env->eval("(GD)"), Math::Trig::GD, 'invocation - import');
-is($env->eval("(Math::Trig::GD)"), Math::Trig::GD, 'invocation - full name');
-cmp_ok(
-    $env->eval("(deg2deg 1792)"),
-    '==',
-    Math::Trig::deg2deg(1792),
-    'invocation - with parameters'
-);
+is($env->eval("(deg2grad 90)"), 100, 'invocation - import');
+is($env->eval("(Math::Trig::deg2grad 90)"), 100, 'invocation - full name');

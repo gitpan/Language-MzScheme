@@ -48,7 +48,7 @@ rename('MzScheme.pm' => 'lib/Language/MzScheme_in.pm');
 makemaker_args(
     LIBS => "-L$plt_path/lib -lmzgc -lmzscheme ".run(qw(swig -perl -ldflags)),
     INC => "-I$include",
-    OPTIMIZE => '-g',
+#   OPTIMIZE => '-g',
     OBJECT => "mzscheme_wrap$Config{obj_ext}",
 );
 

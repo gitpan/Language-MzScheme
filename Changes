@@ -1,3 +1,13 @@
+[Changes for 0.06 - June 14, 2004]
+
+Beginning of at least some module documentations.
+
+Massive refactoring for Perl method wrappers, resulting in better
+error handling and more robust symbol importing.
+
+The script/mzperl program now supports inlined Perl code, via
+;__PERL__; ... ;__END__; blocks.
+
 [Changes for 0.05 - June 13, 2004]
 
 Much more efficient vector<=>arrayref type conversion.
