@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 34;
+use Test::More tests => 40;
 
 use_ok('Language::MzScheme');
 
@@ -50,12 +50,24 @@ is(<$port>, 'use', '<>, port');
 
 my $sym = $env->sym('symbol');
 ok($env->S->SYMBOLP($sym), 'new symbol with ->sym');
-my $str = $env->val('value');
-ok($env->S->STRINGP($str), 'new value with ->val');
+my $val = $env->val('value');
+ok($env->S->STRINGP($val), 'new value with ->val');
 
 my $code = $env->lookup('square');
 isa_ok($code, 'CODE', 'to_coderef');
 is($code->(4), 16, '->(), scheme-lambda');
+
+my $num = $code->(4);
+is(++$num, 17, 'number ++');
+$num *= 2;
+is($num, 34, 'number *=');
+is(--$num, 33, 'number --');
+
+my $str = $env->eval('"abc"');
+is(++$str, 'abd', 'string ++ (magical)');
+$str x= 2;
+is($str, 'abdabd', 'string x=');
+cmp_ok(--$str, '==', -1, 'string -- (non-magical)');
 
 my $lambda = sub { (Hello => reverse @_) };
 my $hello = $env->define('perl-hello', $lambda);

@@ -14,9 +14,6 @@ build_requires('Test::More');
 install_script('script/mzperl');
 can_cc() or die "This module requires a C compiler";
 
-my ($swig_version) = (run('swig', '-version') =~ /([\d\.]+)/g)
-  or die "SWIG not found - http://www.swig.org/";
-
 my ($mz_version) = (run('mzscheme', '--version') =~ /([\d\.]+)/g)
   or die "MzScheme not found - http://plt-scheme.org/software/mzscheme/";
 
@@ -29,26 +26,30 @@ my $plt_path = $ENV{PLT_PATH} || do {
 };
 
 my $include = "$plt_path/include";
--d $include or die "Cannot find 'include' dir under $plt_path; please set \$ENV{PLT_PATH}";
+-d $include or die "Cannot find 'include' path under $plt_path; please set \$ENV{PLT_PATH}";
 
-make_h();
+if (-e 'inc/.author') {
+    my ($swig_version) = (run('swig', '-version') =~ /([\d\.]+)/g)
+        or die "SWIG not found - http://www.swig.org/";
 
-system(
-    'swig',
-    "-I$include",
-    ((v($swig_version) ge v('1.3.20')) ? qw(-noproxy) : ()),
-    qw(-module Language::MzScheme -includeall -exportall -perl5 mzscheme.i)
-);
+    (v($swig_version) ge v('1.3.24'))
+        or die "SWIG 1.3.24+ not found - http://www.swig.org/";
 
-#make_c();
+    make_h();
 
-unlink('lib/Language/MzScheme_in.pm');
-rename('MzScheme.pm' => 'lib/Language/MzScheme_in.pm');
+    system(
+        'swig',
+        "-I$include",
+        qw(-noproxy -module Language::MzScheme -includeall -exportall -perl5 mzscheme.i)
+    );
+
+    unlink('lib/Language/MzScheme_in.pm');
+    rename('MzScheme.pm' => 'lib/Language/MzScheme_in.pm');
+}
 
 makemaker_args(
-    LIBS => "-L$plt_path/lib -lmzgc -lmzscheme ".run(qw(swig -perl -ldflags)),
+    LIBS => "-L$plt_path/lib -lmzgc -lmzscheme",
     INC => "-I$include",
-#   OPTIMIZE => '-g',
     OBJECT => "mzscheme_wrap$Config{obj_ext}",
 );
 
@@ -127,6 +128,9 @@ sub v {
 
 sub run {
     my ($wtr, $rdr, $err);
+
+    local $SIG{__WARN__} = sub { 1 };
+
     my $pid = open3($wtr, $rdr, $err, @_);
     my $out = join('', map $_ && readline($_), $rdr, $err);
     chomp $out;

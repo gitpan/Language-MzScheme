@@ -11,10 +11,9 @@
 ^.*\.hi
 ^scheme
 ^MzScheme
-^mzscheme_wrap
+^mzscheme_wrap\.(?![ch])
 ^blibdirs
 ^pm_to_blib
-^lib/Language/MzScheme_in.pm
 ~$
 \.old$
 ^#.*#$

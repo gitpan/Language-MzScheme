@@ -6,8 +6,7 @@ see the module usage information.
 
 * Prerequisites
 
-- The C++ Compiler used to compile your perl installation
-- SWIG v1.3 or above - http://www.swig.org/
+- The compiler used to compile your perl installation
 - MzScheme v200 or above - http://plt-scheme.org/software/mzscheme/
 
 * Installation

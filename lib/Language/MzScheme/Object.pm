@@ -15,6 +15,8 @@ use overload (
     '*{}'       => \&to_globref,
     '${}'       => \&to_scalarref,
     '<>'        => \&read,
+    '++'        => \&increment,
+    '--'        => \&decrement,
     fallback    => 1,
 );
 
@@ -92,6 +94,11 @@ foreach my $proc (qw(
         my $env = shift(@_)->env;
         $env->can($proc)->($env, @_);
     };
+}
+
+sub new {
+    my $self = shift;
+    $self->bless( S->from_perl_scalar($_[0]) );
 }
 
 sub to_bool {
@@ -189,7 +196,7 @@ sub as_display {
 sub as_write {
     my $self = shift;
     my $out = S->make_string_output_port;
-    S->display($self, $out);
+    S->write($self, $out);
     return S->get_string_output($out);
 }
 
@@ -230,6 +237,18 @@ sub isa {
     my ($self, $type) = @_;
     my $p = S->can("MZSCHEME_${type}_REFP") or return $self->SUPER::isa($type);
     return $p->($self);
+}
+
+sub increment {
+    my $scalar = as_perl_data($_[0]);
+    $scalar++;
+    $_[0] = $_[0]->new($scalar);
+}
+
+sub decrement {
+    my $scalar = as_perl_data($_[0]);
+    $scalar--;
+    $_[0] = $_[0]->new($scalar);
 }
 
 1;

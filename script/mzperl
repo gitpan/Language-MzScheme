@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Language::MzScheme;
+require Language::MzScheme;
 
 =head1 NAME
 
