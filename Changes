@@ -1,3 +1,24 @@
+[Changes for 0.04 - June 11, 2004]
+
+Backported to SWIG 1.3.19 and earlier versions.
+
+Methods refactored into Language::MzScheme::Object and
+Language::MzScheme::Env classes.
+
+All scheme value types turned into properly overloaded Perl objects.
+Type checking methods, eg. ->isa('CODE'), are also implemented.
+
+Deep copying into perl data structure supported as $obj->as_perl_data.
+
+Previously exported symbols now become class methods for Language::MzScheme,
+with the prefix 'mzscheme_', 'scheme_' and 'SCHEME_' removed.
+
+Transparent procedure calls across perl/scheme boundaries.
+
+Perl objects and classes may now be bound as scheme primitives.
+To invoke perl objects from scheme, do this:
+    (object 'method arg1 arg2 ...)
+
 [Changes for 0.03 - June 9, 2004]
 
 Build cleanly on SWIG 1.3.21, which we now requires.

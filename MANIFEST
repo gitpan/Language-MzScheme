@@ -8,6 +8,8 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/Language/MzScheme.pm
+lib/Language/MzScheme/Env.pm
+lib/Language/MzScheme/Object.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP

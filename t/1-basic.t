@@ -1,31 +1,84 @@
 #!/usr/bin/perl
 
 use strict;
-use Test;
-use FindBin;
-use Language::MzScheme ':all';
+use Test::More 'no_plan';
 
-BEGIN { plan tests => 5 }
+use_ok('Language::MzScheme');
 
-my $env = scheme_basic_env();
-ok(eval_scheme('(+ 1 2)'), 3);
+my $env = Language::MzScheme->basic_env;
+my $obj = $env->eval(q{
+    (- 1 1)
+});
 
-sub perl_hello { (Hello => reverse map eval_scheme($_), @_) };
-my $prim = mzscheme_make_perl_prim_w_arity(\&perl_hello, "perl:procedure", 0, -1);
-scheme_add_global('perl-hello', $prim, $env);
+isa_ok($obj, "Language::MzScheme::Object");
 
-ok(eval_scheme('perl-hello'), '#<primitive:perl:procedure>');
-ok(eval_scheme('(car (perl-hello "Scheme" "Perl"))'), 'Hello');
-ok(eval_scheme('(cadr (perl-hello "Scheme" "Perl"))'), 'Perl');
-ok(eval_scheme('(caddr (perl-hello "Scheme" "Perl"))'), 'Scheme');
+my $s_expression = q{
+    (define (square x) (* x x))
+    (define (tree-reverse tr)
+        (if (not (pair? tr))
+            tr
+            (cons (tree-reverse (cdr tr))
+                  (tree-reverse (car tr)))))
+};
+$env->eval($s_expression);
 
-sub eval_scheme {
-    my $out = scheme_make_string_output_port();
-    my $val = (
-        UNIVERSAL::isa($_[0], '_p_Scheme_Object')
-            ? scheme_eval($_[0], $env)
-            : scheme_eval_string($_[0], $env)
-    );
-    scheme_display($val, $out);
-    return scheme_get_string_output($out);
-}
+is($env->eval('(square 4)'), 16, 'eval');
+is($env->apply('tree-reverse', $env->eval(q{'(a b c)})), '(((() . c) . b) . a)', 'apply');
+is($env->lambda(sub { 1..10 })->(), '(1 2 3 4 5 6 7 8 9 10)', 'lambda');
+
+ok($obj, 'to_boolean');
+is($obj, 0, 'to_number');
+is($obj."1", "01", 'to_string');
+
+ok(eq_array($env->eval("'(1 2 3)"), [1..3]), 'to_arrayref, list');
+ok(eq_array($env->eval("'#(1 2 3)"), [1..3]), 'to_arrayref, vector');
+isa_ok($env->eval("'#(1 2 3)"), 'ARRAY', 'vector');
+
+ok(eq_hash($env->eval("'#hash((1 . 2) (3 . 4))"), {1..4}), 'to_hashref, hash');
+ok(eq_hash($env->eval("'((1 . 2) (3 . 4))"), {1..4}), 'to_hashref, alist');
+isa_ok($env->eval("'((1 . 2) (3 . 4))"), 'HASH', 'alist');
+
+my $struct = $env->eval("'($s_expression)")->as_perl_data;
+ok(eq_array($struct->[0], ['define', ['square', 'x'], ['*', 'x', 'x']]), 'as_perl_data');
+
+is(${$env->eval("(box 123)")}, 123, 'to_scalarref, box');
+
+my $port = $env->apply('open-input-file', "$0");
+is($port->read_char, '#', 'read_char, port');
+is($port->read, '!/usr/bin/perl', 'read, port');
+is(<$port>, 'use', '<>, port');
+
+my $code = $env->lookup('square');
+isa_ok($code, 'CODE', 'to_coderef');
+is($code->(4), 16, '->(), scheme-lambda');
+
+my $lambda = sub { (Hello => map $_, reverse @_) };
+my $hello = $env->define('perl-hello', $lambda);
+isa_ok($hello, 'CODE', 'define');
+
+my $ditto = '...with ->eval';
+is($hello, "#<primitive:$lambda>", 'primitive name');
+is($env->eval('perl-hello'), "#<primitive:$lambda>", $ditto);
+
+is($hello->("Scheme", "Perl"), '(Hello Perl Scheme)', '->(), perl-lambda');
+is($env->eval('(perl-hello "Scheme" "Perl")'), '(Hello Perl Scheme)', $ditto);
+
+is($hello->("Scheme", "Perl")->car, 'Hello', '->car');
+is($env->eval('(car (perl-hello "Scheme" "Perl"))'), 'Hello', $ditto);
+
+is($hello->("Scheme", "Perl")->cadr, 'Perl', '->cadr');
+is($env->eval('(cadr (perl-hello "Scheme" "Perl"))'), 'Perl', $ditto);
+
+is($hello->("Scheme", "Perl")->caddr, 'Scheme', '->caddr');
+is($env->eval('(caddr (perl-hello "Scheme" "Perl"))'), 'Scheme', $ditto);
+
+require Math::BigInt;
+my $bigint = $env->define('bigint', Math::BigInt->new(0x12345));
+ok(eq_array($bigint->('as_hex'), ['0x12345']), '->(), perl-object');
+ok(eq_array($env->eval("(bigint 'as_hex)"), ['0x12345']), $ditto);
+
+$env->define('perl-eval-list', sub { eval $_[0] });
+$env->eval('(define (perl-eval x) (car (perl-eval-list x)))');
+is(eval($env->eval(q{(perl-eval "$env->eval('(perl-eval 1729)')")})), 1729, 'nested eval');
+
+1;

@@ -2,6 +2,7 @@
 
 use strict;
 use Config;
+use IPC::Open3;
 use inc::Module::Install;
 
 name('Language-MzScheme');
@@ -9,26 +10,17 @@ version_from('lib/Language/MzScheme.pm');
 abstract_from('lib/Language/MzScheme.pm');
 author('Autrijus Tang <autrijus@autrijus.org>');
 license('perl');
+build_requires('Test::More');
 can_cc() or die "This module requires a C compiler";
 
-print << ".";
-Checking dependencies:
-- SWIG v1.3.20 or above - http://www.swig.org/
-- MzScheme v200 or above - http://plt-scheme.org/software/mzscheme/
-.
+my ($swig_version) = (run('swig', '-version') =~ /([\d\.]+)/g)
+  or die "SWIG not found - http://www.swig.org/";
 
-`swig -ldflags` =~ /\w/
-  or die "SWIG not found, aborting";
-`mzscheme --version` =~ /\d/
-  or die "MzScheme not found, aborting";
-
-print << ".";
-...done.  
-(If build fails, please check swig and mzscheme's versions manually.)
-.
+my ($mz_version) = (run('mzscheme', '--version') =~ /([\d\.]+)/g)
+  or die "MzScheme not found - http://plt-scheme.org/software/mzscheme/";
 
 my $plt_path = $ENV{PLT_PATH} || do {
-    my $show = `mzc --ldl-show --help`
+    my $show = run(qw(mzc --ldl-show --help))
       or die 'Cannot run mzc; please set $ENV{PLT_PATH}';
     $show =~ m!\("([^"]+)/lib/!i
       or die 'Cannot find PLT path; please set $ENV{PLT_PATH}';
@@ -38,26 +30,30 @@ my $plt_path = $ENV{PLT_PATH} || do {
 my $include = "$plt_path/include";
 -d $include or die "Cannot find 'include' dir under $plt_path; please set \$ENV{PLT_PATH}";
 
-make_hi();
+make_h();
 
 system(
     'swig',
     "-I$include",
-    qw(-module Language::MzScheme -noproxy -includeall -exportall -perl5 mzscheme.i)
+    ((v($swig_version) ge v('1.3.20')) ? qw(-noproxy -noruntime) : ()),
+    qw(-module Language::MzScheme -includeall -exportall -perl5 mzscheme.i)
 );
+
+#make_c();
 
 unlink('lib/Language/MzScheme_in.pm');
 rename('MzScheme.pm' => 'lib/Language/MzScheme_in.pm');
 
 makemaker_args(
-    LIBS => "-L$plt_path/lib -lmzgc -lmzscheme",
+    LIBS => "-L$plt_path/lib -lmzgc -lmzscheme ".run(qw(swig -perl -ldflags)),
     INC => "-I$include",
+    OPTIMIZE => '-g',
     OBJECT => "mzscheme_wrap$Config{obj_ext}",
 );
 
 WriteAll( sign => 1 );
 
-sub make_hi {
+sub make_h {
     open IN, "$include/scheme.h" or die $!;
     open OUT, "> mzscheme_wrap.h" or die $!;
     while (<IN>) {
@@ -81,4 +77,57 @@ sub make_hi {
     }
     close OUT;
     close IN;
+
+    open IN, "$include/stypes.h" or die $!;
+    open OUT, ">> mzscheme_wrap.h" or die $!;
+    while (<IN>) {
+        print OUT $_;
+    }
+    close OUT;
+    close IN;
+}
+
+sub make_c {
+    local $/;
+    open IN, "mzscheme_wrap.c" or die $!;
+
+    my $text = '';
+    while (<IN>) {
+        if (/^static\s+swig_type_info\s+_swigt__p_(Scheme_(\w+))\[\]/o){
+            my $fromType = $1;
+            my $toType = "Language::MzScheme::".munge($1);
+            print << "END";
+static void *_p_${fromType}To_p_${toType}(void *x) {
+return (void *)(($toType *) (($fromType *) x));
+}  
+END
+            s/("$toType\s*\*"\}),/$1,{"_p_$fromType",_p_${fromType}To_p_${toType}},/;
+        }
+        $text .= $_;
+    }
+
+    close IN;
+
+    open OUT, "> mzscheme_wrap.c" or die $!;
+    print OUT $text;
+    close OUT;
+}
+
+sub munge {
+    my $func = shift;
+    $func =~ s/_(?:[A-Z])//g;
+    $func;
+}
+
+sub v {
+    my $v = shift;
+    join('', map chr, $v =~ /(\d+)/g);
+}
+
+sub run {
+    my ($wtr, $rdr, $err);
+    my $pid = open3($wtr, $rdr, $err, @_);
+    my $out = join('', map $_ && readline($_), $rdr, $err);
+    chomp $out;
+    return $out;
 }

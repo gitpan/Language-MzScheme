@@ -26,7 +26,7 @@
     $1 = (Scheme_Object **) malloc((len+2)*sizeof(Scheme_Object *));
     for (i = 0; i <= len; i++) {
         tv = av_fetch(tempav, i, 0);
-        $1[i] = (Scheme_Object *) SvIV((SV*)SvRV(*tv));
+        SWIG_ConvertPtr((SV *)*tv, (void **) &$1[i], SWIGTYPE_p_Scheme_Object, 0);
     }
     $1[i] = NULL;
 };
@@ -36,13 +36,14 @@
 }
 
 %typemap(out) Scheme_Object ** {
-    $result = newRV((SV *)_mzscheme_objects_AV($1));
+    $result = newRV((SV *)_mzscheme_objects_AV((void **)$1, (char *)&SWIGTYPE_p_Scheme_Object));
     sv_2mortal($result);
     argvi++;
 }
 
 void            mzscheme_init();
 Scheme_Object*  mzscheme_make_perl_prim_w_arity(Perl_Scalar cv_ref, const char *name, int mina, int maxa);
+Scheme_Object*  mzscheme_make_perl_object_w_arity(Perl_Scalar object, const char *name, int mina, int maxa);
 Scheme_Object * mzscheme_from_perl_scalar (Perl_Scalar sv);
 
 Scheme_Type     SCHEME_TYPE(Scheme_Object *obj);
@@ -56,6 +57,76 @@ int             SCHEME_PROC_STRUCTP(Scheme_Object *obj);
 int             SCHEME_STRUCT_PROCP(Scheme_Object *obj);
 int             SCHEME_GENERICP(Scheme_Object *obj);
 int             SCHEME_CLOSUREP(Scheme_Object *obj);
+
+int             SCHEME_CHARP(Scheme_Object *obj);
+int             SCHEME_STRINGP(Scheme_Object *obj);
+int             SCHEME_SYMBOLP(Scheme_Object *obj);
+int             SCHEME_STRSYMP(Scheme_Object *obj);
+
+int             SCHEME_BOOLP(Scheme_Object *obj);
+int             SCHEME_FALSEP(Scheme_Object *obj);
+int             SCHEME_TRUEP(Scheme_Object *obj);
+int             SCHEME_EOFP(Scheme_Object *obj);
+int             SCHEME_VOIDP(Scheme_Object *obj);
+
+int             SCHEME_NULLP(Scheme_Object *obj);
+int             SCHEME_PAIRP(Scheme_Object *obj);
+
+int             SCHEME_LISTP(Scheme_Object *obj);
+int             SCHEME_VECTORP(Scheme_Object *obj);
+
+int             SCHEME_BOXP(Scheme_Object *obj);
+
+int             SCHEME_BUCKTP(Scheme_Object *obj);
+int             SCHEME_HASHTP(Scheme_Object *obj);
+
+int             SCHEME_INPORTP(Scheme_Object *obj);
+int             SCHEME_OUTPORTP(Scheme_Object *obj);
+
+char            SCHEME_CHAR_VAL(Scheme_Object *obj);
+int             SCHEME_INT_VAL(Scheme_Object *obj);
+double          SCHEME_DBL_VAL(Scheme_Object *obj);
+float           SCHEME_FLT_VAL(Scheme_Object *obj);
+#ifdef MZ_USE_SINGLE_FLOATS
+float           SCHEME_FLOAT_VAL(Scheme_Object *obj);
+#else
+double          SCHEME_FLOAT_VAL(Scheme_Object *obj);
+#endif
+char *          SCHEME_STR_VAL(Scheme_Object *obj);
+char *          SCHEME_STRTAG_VAL(Scheme_Object *obj);
+char *          SCHEME_STRLEN_VAL(Scheme_Object *obj);
+char *          SCHEME_SYM_VAL(Scheme_Object *obj);
+int             SCHEME_SYM_LEN(Scheme_Object *obj);
+unsigned long   SCHEME_SYMSTR_OFFSET(Scheme_Object *obj);
+char *          SCHEME_STRSYM_VAL(Scheme_Object *obj);
+Scheme_Object*  SCHEME_BOX_VAL(Scheme_Object *obj);
+int             SCHEME_VEC_SIZE(Scheme_Object *obj);
+Scheme_Object** SCHEME_VEC_ELS(Scheme_Object *obj);
+Scheme_Object** SCHEME_VEC_BASE(Scheme_Object *obj);
+
+Scheme_Object*  SCHEME_CAR(Scheme_Object *obj);
+Scheme_Object*  SCHEME_CDR(Scheme_Object *obj);
+Scheme_Object*  SCHEME_CADR(Scheme_Object *obj);
+Scheme_Object*  SCHEME_CAAR(Scheme_Object *obj);
+Scheme_Object*  SCHEME_CDDR(Scheme_Object *obj);
+
+/*
+#define SCHEME_ENVBOX_VAL(obj)  (*((Scheme_Object **)(obj)))
+#define SCHEME_WEAK_BOX_VAL(obj) SCHEME_BOX_VAL(obj)
+
+#define SCHEME_PTR_VAL(obj)  (((Scheme_Small_Object *)(obj))->u.ptr_val)
+#define SCHEME_PTR1_VAL(obj) ((obj)->u.two_ptr_val.ptr1)
+#define SCHEME_PTR2_VAL(obj) ((obj)->u.two_ptr_val.ptr2)
+#define SCHEME_IPTR_VAL(obj) ((obj)->u.ptr_int_val.ptr)
+#define SCHEME_LPTR_VAL(obj) ((obj)->u.ptr_long_val.ptr)
+#define SCHEME_INT1_VAL(obj) ((obj)->u.two_int_val.int1)
+#define SCHEME_INT2_VAL(obj) ((obj)->u.two_int_val.int2)
+#define SCHEME_PINT_VAL(obj) ((obj)->u.ptr_int_val.pint)
+#define SCHEME_PLONG_VAL(obj) ((obj)->u.ptr_long_val.pint)
+*/
+
+#define SCHEME_CPTR_VAL(obj) SCHEME_PTR1_VAL(obj)
+#define SCHEME_CPTR_TYPE(obj) ((char *)SCHEME_PTR2_VAL(obj))
 
 Scheme_Config   *scheme_config;
 Scheme_Env      *scheme_basic_env(void);

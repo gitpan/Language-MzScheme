@@ -1,13 +1,17 @@
 package Language::MzScheme;
-$Language::MzScheme::VERSION = '0.03';
+$Language::MzScheme::VERSION = '0.04';
 
 use strict;
 use vars qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
 use Language::MzScheme_in;
+use Language::MzScheme::Env;
+use Language::MzScheme::Object;
 
-@EXPORT_OK = @EXPORT;
-@EXPORT = ();
-%EXPORT_TAGS = ( all => \@EXPORT_OK );
+BEGIN {
+    @EXPORT_OK = @EXPORT;
+    @EXPORT = ();
+    %EXPORT_TAGS = ( all => \@EXPORT_OK );
+}
 
 =head1 NAME
 
@@ -15,34 +19,48 @@ Language::MzScheme - Perl bindings to PLT MzScheme
 
 =head1 VERSION
 
-This document describes version 0.03 of Language::MzScheme, released
-June 9, 2004.
+This document describes version 0.04 of Language::MzScheme, released
+June 11, 2004.
 
 =head1 SYNOPSIS
 
     use strict;
-    use Language::MzScheme ':all';
-    my $env = scheme_basic_env();
-    my $out = scheme_get_param($scheme_config, $MZCONFIG_OUTPUT_PORT);
-    my $val = scheme_eval_string('(+ 1 2)', $env);
-    scheme_display($val, $out);
-    scheme_display(scheme_make_char("\n"), $out);
+    use Language::MzScheme;
+    my $env = Language::MzScheme->basic_env;
+    my $val = $env->eval('(+ 1 2)');
+
+    # See t/1-basic.t in the source distribution for more!
 
 =head1 DESCRIPTION
 
 This module provides Perl bindings to PLT's MzScheme language.
 
-Currently, it simply exports all C enums, functions and symbols found in
-the MzScheme's extension table into Perl space, without any further
-processing.
-
-Object-oriented wrappers and Perl-based primitives are planned for the
-next few versions.
+The documentation is sorely lacking at this moment.  Please consult
+F<t/1-basic.t> in the source distribution, for a synopsis of supported
+features.
 
 =cut
 
 if (!$Language::MzScheme::Initialized) {
+    no strict 'refs';
     mzscheme_init() if defined &mzscheme_init;
+
+    foreach my $func (@EXPORT_OK) {
+        my $idx = index(lc($func), 'scheme_');
+        $idx > -1 or next;
+        my $sym = substr($func, $idx + 7);
+        *$sym = sub { shift; goto &$func }
+            unless defined &$sym or defined $$sym;
+    }
+
+    foreach my $func (@EXPORT_OK) {
+        my $idx = index(lc($func), 'mzscheme_');
+        $idx > -1 or next;
+        my $sym = substr($func, $idx + 9);
+        *$sym = sub { shift; goto &$func }
+            unless defined &$sym or defined $$sym;
+    }
+
     $Language::MzScheme::Initialized++;
 }
 
