@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 32;
 
 use_ok('Language::MzScheme');
 
-my $env = Language::MzScheme->basic_env;
+my $env = Language::MzScheme->new;
 my $obj = $env->eval(q{
     (- 1 1)
 });
@@ -52,7 +52,7 @@ my $code = $env->lookup('square');
 isa_ok($code, 'CODE', 'to_coderef');
 is($code->(4), 16, '->(), scheme-lambda');
 
-my $lambda = sub { (Hello => map $_, reverse @_) };
+my $lambda = sub { (Hello => reverse @_) };
 my $hello = $env->define('perl-hello', $lambda);
 isa_ok($hello, 'CODE', 'define');
 
@@ -72,13 +72,3 @@ is($env->eval('(cadr (perl-hello "Scheme" "Perl"))'), 'Perl', $ditto);
 is($hello->("Scheme", "Perl")->caddr, 'Scheme', '->caddr');
 is($env->eval('(caddr (perl-hello "Scheme" "Perl"))'), 'Scheme', $ditto);
 
-require Math::BigInt;
-my $bigint = $env->define('bigint', Math::BigInt->new(0x12345));
-ok(eq_array($bigint->('as_hex'), ['0x12345']), '->(), perl-object');
-ok(eq_array($env->eval("(bigint 'as_hex)"), ['0x12345']), $ditto);
-
-$env->define('perl-eval-list', sub { eval $_[0] });
-$env->eval('(define (perl-eval x) (car (perl-eval-list x)))');
-is(eval($env->eval(q{(perl-eval "$env->eval('(perl-eval 1729)')")})), 1729, 'nested eval');
-
-1;

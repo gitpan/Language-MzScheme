@@ -1,3 +1,32 @@
+[Changes for 0.05 - June 13, 2004]
+
+Much more efficient vector<=>arrayref type conversion.
+
+Context symbols added to function definition and runtime object
+invocation with sigils; the default context is to interpret it
+as scalar if only one value has been returned, and as a list otherwise.
+
+Objects and code references now preserve their identity when
+casted into scheme object and later dereferenced with ->as_perl_data.
+
+Environment is now created with Language::MzScheme->new, which adds
+perl-specific bindings (perl-use, perl-require, perl-do, perl-eval)
+on top of the basic env.
+
+New utility, script/mzperl, a perl-embedded mzscheme interpreter.
+
+Full round-trip for non-self-referential data structures now works;
+you can now pass unblessed references into scheme.  (Blessed references
+already works as object closures.)
+
+Proper error handling; scheme-level errors are turned into "die" calls.
+Calls within eval{} will return scheme_undefined, but $SIG{__DIE__} will
+catch the actual error.
+
+Object closure invocation now demands a method instead of silently dying.
+
+Extensive tests for context, object, data, perl-calls and error handling.
+
 [Changes for 0.04 - June 11, 2004]
 
 Backported to SWIG 1.3.19 and earlier versions.

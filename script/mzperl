@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+use Language::MzScheme;
+my $env = Language::MzScheme->new;
+my $file = (@ARGV ? shift(@ARGV) : '-');
+open CODE, $file or die qq(Can't open mzperl script "$file": $!\n);
+$env->eval(do { local $/; my $code = <CODE>; $code =~ s{^#!.*}{}; $code });

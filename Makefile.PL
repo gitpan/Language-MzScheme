@@ -11,6 +11,7 @@ abstract_from('lib/Language/MzScheme.pm');
 author('Autrijus Tang <autrijus@autrijus.org>');
 license('perl');
 build_requires('Test::More');
+install_script('script/mzperl');
 can_cc() or die "This module requires a C compiler";
 
 my ($swig_version) = (run('swig', '-version') =~ /([\d\.]+)/g)

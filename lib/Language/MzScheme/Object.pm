@@ -8,7 +8,7 @@ use overload (
     'bool'      => \&to_bool,
     '""'        => \&to_string,
     '0+'        => \&to_number,
-    '='         => \&to_lvalue,
+    '!'         => \&to_negate,
     '&{}'       => \&to_coderef,
     '%{}'       => \&to_hashref,
     '@{}'       => \&to_arrayref,
@@ -37,7 +37,10 @@ foreach my $proc (qw( read-char write-char )) {
     *$sym = sub { $_[0]->apply($proc, $_[0]) };
 }
 
-foreach my $proc (qw( eval apply lambda lookup )) {
+foreach my $proc (qw(
+    eval apply lambda lookup
+    perl_do perl_eval perl_require perl_use perl_no
+)) {
     no strict 'refs';
     *$proc = sub {
         my $env = shift(@_)->env;
@@ -47,32 +50,37 @@ foreach my $proc (qw( eval apply lambda lookup )) {
 
 sub to_bool {
     my $self = shift;
-    !(S->VOIDP($self) || S->FALSEP($self));
+    !S->UNDEFP($self);
 }
 
 sub to_string {
     my $self = shift;
     S->STRSYMP($self) ? S->STRSYM_VAL($self) :
     S->CHARP($self)   ? S->CHAR_VAL($self) :
-    (S->VOIDP($self) || S->FALSEP($self)) ? '' :
+    S->UNDEFP($self)  ? '' :
                         $self->as_display;
 }
 
 sub to_number {
     my $self = shift;
-    (S->VOIDP($self) || S->FALSEP($self)) ? 0 : $self->as_display;
+    S->UNDEFP($self) ? 0 : $self->as_display;
+}
+
+sub to_negate {
+    my $self = shift;
+    S->UNDEFP($self) ? '#t' : undef;
 }
 
 sub env {
     my $self = shift;
-    $Language::MzScheme::Env::Objects{+$self}
+    $Language::MzScheme::Env::Objects{S->REFADDR($self)}
         or die "Cannot find associated environment";
 }
 
 sub bless {
     my ($self, $obj) = @_;
-    $Language::MzScheme::Env::Objects{+$obj}||=
-        $Language::MzScheme::Env::Objects{+$self} if defined $obj;
+    $Language::MzScheme::Env::Objects{S->REFADDR($obj)}||=
+        $Language::MzScheme::Env::Objects{S->REFADDR($self)} if defined $obj;
     return $obj;
 }
 
@@ -92,7 +100,7 @@ sub to_hashref {
         $self,
         $Cons ||= $self->lookup('cons'),
     ) : $self;
-    
+
     my %rv;
     while (my $obj = $alist->car) {
         $rv{$obj->car} = $obj->cdr;
@@ -105,7 +113,10 @@ sub to_arrayref {
     my $self = shift;
 
     if (S->VECTORP($self)) {
-        return [ map $self->bless($_), @{S->VEC_BASE($self)} ];
+        my $vec = S->VEC_BASE($self);
+        my $env = $self->env;
+        $Language::MzScheme::Env::Objects{+$_}||=$env for @$vec;
+        return $vec;
     }
 
     return [
@@ -136,22 +147,28 @@ sub as_write {
 sub as_perl_data {
     my $self = shift;
 
-    if ( $self->isa('CODE') ) {
+    if ( S->PERLP($self) ) {
+        return S->to_perl_scalar($self);
+    }
+    if ( S->CODE_REFP($self) ) {
         return $self->to_coderef;
     }
-    elsif ( $self->isa('HASH') and !S->NULLP($self) ) {
+    elsif ( S->HASHTP($self) ) {
         my $hash = $self->to_hashref;
         $hash->{$_} = $hash->{$_}->as_perl_data for keys %$hash;
         return $hash;
     }
-    elsif ( $self->isa('ARRAY') ) {
+    elsif ( S->ARRAY_REFP($self) ) {
         return [ map $_->as_perl_data, @{$self->to_arrayref} ];
     }
-    elsif ( $self->isa('GLOB') ) {
+    elsif ( S->GLOB_REFP($self) ) {
         return $self; # XXX -- doesn't really know what to do
     }
-    elsif ( $self->isa('SCALAR') ) {
+    elsif ( S->SCALAR_REFP($self) ) {
         return \${$self->to_scalarref}->as_perl_data;
+    }
+    elsif ( S->UNDEFP($self) ) {
+        return undef;
     }
     else {
         $self->to_string;
@@ -160,23 +177,8 @@ sub as_perl_data {
 
 sub isa {
     my ($self, $type) = @_;
-    ($type eq 'CODE')   ? S->PROCP($self) :
-    ($type eq 'HASH')   ? S->HASHTP($self)  || $self->is_alist :
-    ($type eq 'ARRAY')  ? S->LISTP($self)   || S->VECTORP($self) :
-    ($type eq 'GLOB')   ? S->INPORTP($self) || S->OUTPORTP($self) :
-    ($type eq 'SCALAR') ? S->BOXP($self)    :
-    $self->SUPER::isa($type);
-}
-
-sub is_alist {
-    my $self = shift;
-    S->NULLP($self) || (
-        S->PAIRP($self) &&
-        S->PAIRP($self->car) &&
-        !S->LISTP($self->caar) &&
-        (!S->PAIRP($self->car->cdr) || S->NULLP($self->car->cdr->cdr)) &&
-        $self->cdr->is_alist
-    );
+    my $p = S->can("MZSCHEME_${type}_REFP") or return $self->SUPER::isa($type);
+    return $p->($self);
 }
 
 1;

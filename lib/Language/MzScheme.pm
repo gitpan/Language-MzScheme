@@ -1,5 +1,5 @@
 package Language::MzScheme;
-$Language::MzScheme::VERSION = '0.04';
+$Language::MzScheme::VERSION = '0.05';
 
 use strict;
 use vars qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -19,31 +19,39 @@ Language::MzScheme - Perl bindings to PLT MzScheme
 
 =head1 VERSION
 
-This document describes version 0.04 of Language::MzScheme, released
-June 11, 2004.
+This document describes version 0.05 of Language::MzScheme, released
+June 13, 2004.
 
 =head1 SYNOPSIS
 
-    use strict;
     use Language::MzScheme;
-    my $env = Language::MzScheme->basic_env;
-    my $val = $env->eval('(+ 1 2)');
+    my $env = Language::MzScheme->new;
+    my $obj = $env->eval('(+ 1 2)');
 
-    # See t/1-basic.t in the source distribution for more!
+    # See t/*.t in the source distribution for more!
 
 =head1 DESCRIPTION
 
 This module provides Perl bindings to PLT's MzScheme language.
 
-The documentation is sorely lacking at this moment.  Please consult
-F<t/1-basic.t> in the source distribution, for a synopsis of supported
-features.
+The documentation is sorely lacking at this moment.  For an overview of
+supported features, please consult F<t/*.t> in the source distribution.
 
 =cut
 
+sub new {
+    my $self = shift;
+    my $env = $self->basic_env;
+    $env->define_perl_wrappers;
+    return $env;
+}
+
 if (!$Language::MzScheme::Initialized) {
     no strict 'refs';
-    mzscheme_init() if defined &mzscheme_init;
+    if (defined &mzscheme_init) {
+        mzscheme_init();
+        $Language::MzScheme::scheme_case_sensitive = 1;
+    }
 
     foreach my $func (@EXPORT_OK) {
         my $idx = index(lc($func), 'scheme_');

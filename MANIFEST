@@ -5,6 +5,7 @@ inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
+inc/Module/Install/Scripts.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/Language/MzScheme.pm
@@ -18,6 +19,12 @@ mzscheme.c
 mzscheme.h
 mzscheme.i
 README
+script/mzperl
 SIGNATURE
 t/0-signature.t
 t/1-basic.t
+t/2-context.t
+t/3-object.t
+t/4-data.t
+t/5-perl.t
+t/6-error.t

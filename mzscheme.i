@@ -9,26 +9,13 @@
 }
 
 %typemap(out) Perl_Scalar {
-    $result = (SV *)$1;
+    $result = newSVsv((SV *)$1);
+    sv_2mortal($result);
+    argvi++;
 }
 
 %typemap(in) Scheme_Object ** {
-    AV *tempav;
-    I32 len;
-    int i;
-    SV  **tv;
-    if (!SvROK($input))
-        croak("argument $argnum is not a reference.");
-    if (SvTYPE(SvRV($input)) != SVt_PVAV)
-        croak("argument $argnum is not an array.");
-    tempav = (AV*)SvRV($input);
-    len = av_len(tempav);
-    $1 = (Scheme_Object **) malloc((len+2)*sizeof(Scheme_Object *));
-    for (i = 0; i <= len; i++) {
-        tv = av_fetch(tempav, i, 0);
-        SWIG_ConvertPtr((SV *)*tv, (void **) &$1[i], SWIGTYPE_p_Scheme_Object, 0);
-    }
-    $1[i] = NULL;
+    $1 = _mzscheme_from_perl_arrayref_to_objects($input);
 };
 
 %typemap(freearg) Scheme_Object ** {
@@ -42,9 +29,27 @@
 }
 
 void            mzscheme_init();
-Scheme_Object*  mzscheme_make_perl_prim_w_arity(Perl_Scalar cv_ref, const char *name, int mina, int maxa);
-Scheme_Object*  mzscheme_make_perl_object_w_arity(Perl_Scalar object, const char *name, int mina, int maxa);
+Scheme_Object*  mzscheme_make_perl_prim_w_arity(Perl_Scalar cv_ref, const char *name, int mina, int maxa, const char *sigil);
+Scheme_Object*  mzscheme_make_perl_object_w_arity(Perl_Scalar object, const char *name, int mina, int maxa, const char *sigil);
 Scheme_Object * mzscheme_from_perl_scalar (Perl_Scalar sv);
+Scheme_Object * mzscheme_from_perl_symbol (Perl_Scalar sv);
+Scheme_Object * mzscheme_from_perl_arrayref (Perl_Scalar sv);
+Scheme_Object * mzscheme_from_perl_hashref (Perl_Scalar sv);
+Perl_Scalar     mzscheme_to_perl_scalar (Scheme_Object *obj);
+
+Scheme_Object * mzscheme_do_apply(Scheme_Object *f, int c, Scheme_Object **args);
+Scheme_Object * mzscheme_do_eval(Scheme_Object *expr, Scheme_Env *env);
+Scheme_Object * mzscheme_do_eval_string_all(char *str, Scheme_Env *env, int all);
+
+int             MZSCHEME_REFADDR(Perl_Scalar sv);
+int             MZSCHEME_UNDEFP(Scheme_Object *obj);
+int             MZSCHEME_ALISTP(Scheme_Object *obj);
+int             MZSCHEME_CODE_REFP(Scheme_Object *obj);
+int             MZSCHEME_HASH_REFP(Scheme_Object *obj);
+int             MZSCHEME_ARRAY_REFP(Scheme_Object *obj);
+int             MZSCHEME_GLOB_REFP(Scheme_Object *obj);
+int             MZSCHEME_SCALAR_REFP(Scheme_Object *obj);
+int             MZSCHEME_PERLP(Scheme_Object *obj);
 
 Scheme_Type     SCHEME_TYPE(Scheme_Object *obj);
 int             SCHEME_PROCP(Scheme_Object *obj);
@@ -128,6 +133,7 @@ Scheme_Object*  SCHEME_CDDR(Scheme_Object *obj);
 #define SCHEME_CPTR_VAL(obj) SCHEME_PTR1_VAL(obj)
 #define SCHEME_CPTR_TYPE(obj) ((char *)SCHEME_PTR2_VAL(obj))
 
+int             scheme_case_sensitive;
 Scheme_Config   *scheme_config;
 Scheme_Env      *scheme_basic_env(void);
 
