@@ -1,3 +1,16 @@
+[Changes for 0.07 - June 15, 2004]
+
+MzPerl now correctly supports end-of-file as end of ";__PERL__;" regions.
+
+All MzScheme code are now evaluated in Language::MzScheme::Env::__eval;
+this made Spiffy-based modules (eg. IO::All) work better.
+
+Avoid importing invalid symbols, such as '(OVERLOAD', into MzScheme space.
+
+Adds nifty call/cc example to bin/mzperl's POD.
+
+Suppressed harmless warnings under -w.
+
 [Changes for 0.06 - June 14, 2004]
 
 Beginning of at least some module documentations.

@@ -79,7 +79,7 @@ sub define {
 
     if (!defined($code)) {
         no strict 'refs';
-        foreach my $sym (sort keys %{"$name\::"}) {
+        foreach my $sym (grep !/^[^a-z]|\W/, sort keys %{"$name\::"}) {
             my $code = *{${"$name\::"}{$sym}}{CODE} or next;
             $sym =~ tr/_/-/;
             $self->define("$name\::$sym", $code);
@@ -143,9 +143,14 @@ and returns the result.
 
 sub eval {
     my $self = shift;
-    my $obj = UNIVERSAL::isa($_[0], S."::Object")
-        ? S->do_eval($_[0], $self)
-        : S->do_eval_string_all($_[0], $self, 1);
+
+    my $obj = do {
+        package Language::MzScheme::Env::__eval;
+        UNIVERSAL::isa($_[0], "Language::MzScheme::Object")
+            ? Language::MzScheme::mzscheme_do_eval($_[0], $self)
+            : Language::MzScheme::mzscheme_do_eval_string_all($_[0], $self, 1);
+    };
+
     $Objects{S->REFADDR($obj)} ||= $self if ref($obj);
     return $obj;
 }
@@ -209,7 +214,7 @@ foreach my $sym (qw(
 
 sub _init_perl_wrappers {
     my $self = shift;
-    my $env_pkg = ref($self).(0+$self);
+    my $env_pkg = __PACKAGE__.'::__eval'; #(0+$self);
 
     no strict 'refs';
     *{"$env_pkg\::mz_eval"} = sub { $self->eval(@_) };
@@ -249,15 +254,17 @@ sub _wrap_use {
         my %seen = map ( ( $_ => 1 ), keys %{"$env_pkg\::"} );
 
         local $@;
-        eval "package $env_pkg;\nuse $pkg ".(
+        my @args;
+        my $eval = "package $env_pkg;\nuse $pkg ".(
             @_ ? do {
-                @_ = map { $_->isa('ARRAY') ? @$_ : $_ } @_;
-                '@_;';
+                @args = map { $_->isa('ARRAY') ? @$_ : $_ } @_;
+                '@args;';
             } : ';'
         );
+        eval $eval;
         die $@ if $@;
 
-        foreach my $sym (sort keys %{"$env_pkg\::"}) {
+        foreach my $sym (grep !/^[^a-z]|\W/, sort keys %{"$env_pkg\::"}) {
             next if $seen{$sym};
             my $code = *{${"$pkg\::"}{$sym}}{CODE} or next;
             $self->define($sym, $code);

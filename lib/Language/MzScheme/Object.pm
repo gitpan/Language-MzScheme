@@ -120,7 +120,8 @@ sub to_negate {
 sub env {
     my $self = shift;
     $Language::MzScheme::Env::Objects{S->REFADDR($self)}
-        or die "Cannot find associated environment";
+        ||= $Language::MzScheme::Env::Objects{0}
+            or die "Cannot find associated environment";
 }
 
 sub bless {

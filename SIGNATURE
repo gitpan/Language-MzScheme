@@ -14,10 +14,10 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 a4de2d54f29b397fe30a533b71edf1def4f1d494 Changes
+SHA1 dc84941e293def4bfbea9b979531b6be4f991098 Changes
 SHA1 63708e7b2260e75bc91172aa577754c8e5415271 MANIFEST
 SHA1 7a81e2090d10fa9903f45f7255b4f30156eb0d5e MANIFEST.SKIP
-SHA1 215e059ea7ecdb586a833dc41bba84b300578dfb META.yml
+SHA1 6c20a0e0d35d4bccf7175ffb06406d3c332b1599 META.yml
 SHA1 a41f7d933c9adb64682f139e17bf4d58fa45185e Makefile.PL
 SHA1 f502bcb5576b2678f411613940c5b901ba5f0270 README
 SHA1 2b65fc08c268c16ae7097d800bacccc7b8c9c905 inc/Module/Install.pm
@@ -29,13 +29,13 @@ SHA1 207dfa13341a374fc78325fbeb99bc36659aef2d inc/Module/Install/Metadata.pm
 SHA1 bfc36deb38cf94243679dfa71f6e8c4e2000d20a inc/Module/Install/Scripts.pm
 SHA1 aff9341a15c04faec47089851e43d9d4061337e7 inc/Module/Install/Win32.pm
 SHA1 8e0d347ca21bc18b380d9d1aa5910b8d078a76b7 inc/Module/Install/WriteAll.pm
-SHA1 ed4e4d5bfe074732c8381471f29c31d3798739aa lib/Language/MzScheme.pm
-SHA1 fc8ee4a89d505614b94488b3ccdc4f0743d9612c lib/Language/MzScheme/Env.pm
-SHA1 7ef0fc9e5a441b3b2b6d0aa920192282c223e479 lib/Language/MzScheme/Object.pm
+SHA1 f19311a76e36c508084d9611a78bce3499be1d6d lib/Language/MzScheme.pm
+SHA1 2c8205a2cbe055ded0e6df76bc38d0d512c56841 lib/Language/MzScheme/Env.pm
+SHA1 7b8bebff67e07b51f0f8f72a3e52ea4d7f212880 lib/Language/MzScheme/Object.pm
 SHA1 7602d4a0c5f3c4eeefa676b6dcfb1b922f9a3751 mzscheme.c
 SHA1 17aa75bc0034488c686c3d370f9652b31925725b mzscheme.h
 SHA1 30bbb57c7092670e6ff2e607c4fef85ef32f0631 mzscheme.i
-SHA1 560aa6cebebd5a651eaf2bee5121fefc1c3a63e6 script/mzperl
+SHA1 29eab989404ec47dec8d15a5e3e8c4a57868a34b script/mzperl
 SHA1 63c7ea0cfdd7643aa113c260eec9c9bf0a6ee8a0 t/0-signature.t
 SHA1 2d94109bd6ba3092b58c62d18c721cda2af0c7af t/1-basic.t
 SHA1 e44b34fb9594096289a38bae74d4ed6330546f6a t/2-context.t
@@ -46,7 +46,7 @@ SHA1 d18267a6e23e81b724003850349c222e3b1ec729 t/6-error.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.3 (FreeBSD)
 
-iD8DBQFAzKLStLPdNzw1AaARAsA7AJ42pbpTOYsMlhxCij+VUkz4rqtrGgCeLoTA
-NNnZ7SqAGzPhKf2OkUvGNL4=
-=YIzY
+iD8DBQFAzhdetLPdNzw1AaARAlrJAJ0aAalszRIfCWI0paZZHOLDXVqWogCgmf0W
+Usw5DqIP2sPN+CGDtkYnjlw=
+=WxGW
 -----END PGP SIGNATURE-----

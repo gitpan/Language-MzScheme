@@ -42,7 +42,7 @@ Language::MzScheme->new->eval(do {
     };
 
     $code =~ s{^\s*#!.*}{};
-    $code =~ s{\;\s*__PERL__\s*;(.*?);\s*__END__\s*;}{
+    $code =~ s{\;\s*__PERL__\s*;(.*?)(?:;\s*__END__\s*;|\z)}{
         '(perl-eval "'.$escape->($1).'")'
     }egs;
     $code;
@@ -102,6 +102,16 @@ C<;__END__;> token, or until the end of file.
 =head1 WHY?
 
 Scheme has no CPAN.  Perl5 has no macros and no continuations.  So... :-)
+
+=head2 Continuations?  In Perl?
+
+Yes.  To wit:
+
+    #!/usr/local/bin/mzperl
+    (let* ((yin ((perl-eval "sub { print $/; @_ }")
+                 (call/cc (perl-eval "sub { @_ }"))))
+           (yang ((perl-eval "sub { print '*'; @_ }")
+                  (call/cc (perl-eval "sub { @_ }"))))) (yin yang))
 
 =head1 AUTHORS
 

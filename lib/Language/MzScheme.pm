@@ -1,5 +1,5 @@
 package Language::MzScheme;
-$Language::MzScheme::VERSION = '0.06';
+$Language::MzScheme::VERSION = '0.07';
 
 use strict;
 use vars qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -19,8 +19,8 @@ Language::MzScheme - Perl bindings to PLT MzScheme
 
 =head1 VERSION
 
-This document describes version 0.06 of Language::MzScheme, released
-June 14, 2004.
+This document describes version 0.07 of Language::MzScheme, released
+June 15, 2004.
 
 =head1 SYNOPSIS
 
@@ -58,7 +58,8 @@ if (!$Language::MzScheme::Initialized) {
         my $idx = index(lc($func), 'scheme_');
         $idx > -1 or next;
         my $sym = substr($func, $idx + 7);
-        *$sym = sub { shift; goto &$func }
+        my $code = __PACKAGE__->can($func);
+        *$sym = sub { shift; goto &$code }
             unless defined &$sym or defined $$sym;
     }
 
@@ -66,7 +67,8 @@ if (!$Language::MzScheme::Initialized) {
         my $idx = index(lc($func), 'mzscheme_');
         $idx > -1 or next;
         my $sym = substr($func, $idx + 9);
-        *$sym = sub { shift; goto &$func }
+        my $code = __PACKAGE__->can($func);
+        *$sym = sub { shift; goto &$code }
             unless defined &$sym or defined $$sym;
     }
 
